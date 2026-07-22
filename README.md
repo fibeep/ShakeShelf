@@ -67,7 +67,7 @@ empty shelf is shown once so you can see where it is.
 | Area | Highlights |
 | --- | --- |
 | **The shelf** | Shake mid-drag to summon it · holds images, text, and colors · items survive relaunches · drag in from Finder/browsers/the screenshot thumbnail, drag back out into any app |
-| **Getting things in** | Auto-add saved screenshots · **+** button pulls from the clipboard · region capture (`⌃⌥⌘4`) straight to the shelf · a built-in notepad |
+| **Getting things in** | Auto-add saved screenshots · **+** button pulls from the clipboard · a camera button that captures the full screen, a selection, or a screen recording · a built-in notepad |
 | **Global shortcuts** | Show/hide shelf (`⌃⌥⌘S`), new note (`⌃⌥⌘N`), capture region (`⌃⌥⌘4`) — all remappable, no Accessibility permission needed |
 | **Multi-select** | Click / ⌘-click / ⇧-click · drag a group out together · batch operations use the selection |
 | **Images** | OCR to text · redact secrets · resize · halve 2×→1× · convert PNG/JPEG/HEIC/PDF · base64 data URI · read QR/barcodes |
@@ -149,9 +149,14 @@ To build a DMG locally instead, run `./package.sh` (optionally passing a
   Shortcuts…** in the menu: click a field, press the keys you want. Escape
   cancels, Delete clears. A shortcut must include ⌘, ⌥ or ⌃ so it can't swallow
   ordinary typing.
-- **Capture a region to the shelf** — `⌃⌥⌘4` (or "Capture Region to Shelf")
-  gives you the usual macOS crosshair, and the result lands on the shelf
-  without ever touching your Desktop. Esc cancels.
+- **Capture the screen to the shelf** — the camera button in the header (and
+  the matching menu-bar items) offers **Capture Full Screen**, **Capture
+  Selection…**, and **Record Screen…**. The shelf hides itself first so it's
+  never in the shot, then reappears with the new item. `⌃⌥⌘4` is a shortcut
+  for the selection capture. Results land on the shelf without ever touching
+  your Desktop. Esc cancels a selection; a recording stops from the menu-bar
+  stop button. Screen capture needs macOS Screen Recording permission — the
+  app points you to the right settings pane the first time it's blocked.
 - **Notes** — the pencil button in the header, "New Note…" in the menu, or
   `⌃⌥⌘N` opens a scratch pad. Type or paste, press `⌘↩`, and it lands on the
   shelf as a text snippet. Right-click any text tile → **Edit…** reopens it in
