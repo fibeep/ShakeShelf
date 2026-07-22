@@ -12,10 +12,12 @@ import AppKit
 final class ShelfRootView: NSView {
     private let store: ShelfStore
     var onClose: (() -> Void)?
+    var onCapture: ((ScreenCapture.Mode) -> Void)?
 
     private let effectView = NSVisualEffectView()
     private let titleLabel = NSTextField(labelWithString: "ShakeShelf")
     private let countLabel = NSTextField(labelWithString: "")
+    private let captureButton = NSButton()
     private let noteButton = NSButton()
     private let eyedropperButton = NSButton()
     private let pasteButton = NSButton()
@@ -83,6 +85,15 @@ final class ShelfRootView: NSView {
         countLabel.textColor = .secondaryLabelColor
         countLabel.translatesAutoresizingMaskIntoConstraints = false
         addSubview(countLabel)
+
+        captureButton.image = NSImage(systemSymbolName: "camera.viewfinder", accessibilityDescription: "Capture screen")
+        captureButton.isBordered = false
+        captureButton.contentTintColor = .secondaryLabelColor
+        captureButton.target = self
+        captureButton.action = #selector(captureTapped)
+        captureButton.toolTip = "Take a screenshot or record the screen (the shelf hides itself first)"
+        captureButton.translatesAutoresizingMaskIntoConstraints = false
+        addSubview(captureButton)
 
         noteButton.image = NSImage(systemSymbolName: "square.and.pencil", accessibilityDescription: "New note")
         noteButton.isBordered = false
@@ -179,6 +190,10 @@ final class ShelfRootView: NSView {
 
             noteButton.centerYAnchor.constraint(equalTo: titleLabel.centerYAnchor),
             noteButton.trailingAnchor.constraint(equalTo: eyedropperButton.leadingAnchor, constant: -8),
+
+            captureButton.centerYAnchor.constraint(equalTo: titleLabel.centerYAnchor),
+            captureButton.trailingAnchor.constraint(equalTo: noteButton.leadingAnchor, constant: -8),
+            captureButton.leadingAnchor.constraint(greaterThanOrEqualTo: countLabel.trailingAnchor, constant: 8),
 
             scrollView.topAnchor.constraint(equalTo: titleLabel.bottomAnchor, constant: 6),
             scrollView.leadingAnchor.constraint(equalTo: leadingAnchor),
@@ -287,6 +302,23 @@ final class ShelfRootView: NSView {
     @objc private func newNoteTapped() {
         newNote()
     }
+
+    @objc private func captureTapped() {
+        let menu = NSMenu()
+        let full = menu.addItem(withTitle: "Capture Full Screen", action: #selector(captureFullScreen), keyEquivalent: "")
+        full.target = self
+        let region = menu.addItem(withTitle: "Capture Selection…", action: #selector(captureSelection), keyEquivalent: "")
+        region.target = self
+        menu.addItem(.separator())
+        let video = menu.addItem(withTitle: "Record Screen…", action: #selector(captureVideo), keyEquivalent: "")
+        video.target = self
+        // Drop the menu just below the button.
+        menu.popUp(positioning: nil, at: NSPoint(x: 0, y: captureButton.bounds.height + 4), in: captureButton)
+    }
+
+    @objc private func captureFullScreen() { onCapture?(.fullScreen) }
+    @objc private func captureSelection() { onCapture?(.region) }
+    @objc private func captureVideo() { onCapture?(.video) }
 
     /// Diffs exactly two selected text snippets, oldest first so the result
     /// reads as "what changed since".

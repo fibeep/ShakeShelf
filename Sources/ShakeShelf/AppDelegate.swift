@@ -77,8 +77,12 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
         pasteItem.target = self
         let pickColorItem = menu.addItem(withTitle: "Pick Color from Screen…", action: #selector(pickColor), keyEquivalent: "")
         pickColorItem.target = self
-        let captureItem = menu.addItem(withTitle: "Capture Region to Shelf", action: #selector(captureRegion), keyEquivalent: "")
-        captureItem.target = self
+        let captureFullItem = menu.addItem(withTitle: "Capture Full Screen", action: #selector(captureFullScreen), keyEquivalent: "")
+        captureFullItem.target = self
+        let captureSelectionItem = menu.addItem(withTitle: "Capture Selection…", action: #selector(captureSelection), keyEquivalent: "")
+        captureSelectionItem.target = self
+        let recordItem = menu.addItem(withTitle: "Record Screen…", action: #selector(recordScreen), keyEquivalent: "")
+        recordItem.target = self
         let noteItem = menu.addItem(withTitle: "New Note…", action: #selector(newNote), keyEquivalent: "")
         noteItem.target = self
         let combinePDFItem = menu.addItem(withTitle: "Combine into One PDF", action: #selector(combineIntoPDF), keyEquivalent: "")
@@ -142,8 +146,16 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
         shelf.newNote()
     }
 
-    @objc private func captureRegion() {
-        shelf.captureRegion()
+    @objc private func captureFullScreen() {
+        shelf.capture(.fullScreen)
+    }
+
+    @objc private func captureSelection() {
+        shelf.capture(.region)
+    }
+
+    @objc private func recordScreen() {
+        shelf.capture(.video)
     }
 
     @objc private func stitchVertically() {

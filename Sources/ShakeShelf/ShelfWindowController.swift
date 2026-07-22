@@ -39,6 +39,7 @@ final class ShelfWindowController: NSWindowController, ShelfStoreDelegate {
 
         store.delegate = self
         rootView.onClose = { [weak self] in self?.hide() }
+        rootView.onCapture = { [weak self] mode in self?.capture(mode) }
     }
 
     required init?(coder: NSCoder) { fatalError("init(coder:) is not supported") }
@@ -109,16 +110,29 @@ final class ShelfWindowController: NSWindowController, ShelfStoreDelegate {
         rootView.diffSelectedSnippets()
     }
 
-    /// Captures a screen region, then shows the shelf so the result is visible.
-    func captureRegion() {
-        RegionCapture.captureRegion(into: store) { [weak self] in
-            guard let self else { return }
-            if self.isVisible {
-                self.bringToFront()
-            } else {
-                self.presentNearMouse()
+    /// Hides the shelf so it can't appear in the shot, captures, then shows
+    /// the shelf again — near the mouse with the new item if something was
+    /// captured, or back where it was if the capture was cancelled.
+    func capture(_ mode: ScreenCapture.Mode) {
+        let wasVisible = isVisible
+        ScreenCapture.capture(
+            mode,
+            into: store,
+            willStart: { [weak self] in self?.hide() },
+            didFinish: { [weak self] captured in
+                guard let self else { return }
+                if captured {
+                    self.presentNearMouse()
+                } else if wasVisible {
+                    self.window?.orderFrontRegardless()
+                }
             }
-        }
+        )
+    }
+
+    /// Kept for the configurable global shortcut, which maps to region capture.
+    func captureRegion() {
+        capture(.region)
     }
 
     func shelfStoreDidChange(_ store: ShelfStore) {
