@@ -1,0 +1,21 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  build:
+    runs-on: macos-14
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Swift version
+        run: swift --version
+
+      # Compile the same universal, release configuration that ships, so a
+      # broken build is caught on every push rather than at release time.
+      - name: Build (universal, release)
+        run: swift build -c release --arch arm64 --arch x86_64

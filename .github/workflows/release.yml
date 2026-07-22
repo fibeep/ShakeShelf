@@ -1,0 +1,39 @@
+name: Release
+
+# Cuts a release whenever a v* tag is pushed. The DMG is named from
+# CFBundleShortVersionString in Resources/Info.plist, so bump that to match the
+# tag before tagging (e.g. set it to 1.0.1 before pushing v1.0.1).
+on:
+  push:
+    tags: ["v*"]
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: macos-14
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Build universal DMG
+        run: ./package.sh
+
+      - name: Checksum
+        run: |
+          DMG=$(ls dist/*.dmg)
+          shasum -a 256 "$DMG" | tee "$DMG.sha256.txt"
+          echo "### $DMG" >> "$GITHUB_STEP_SUMMARY"
+          echo '```' >> "$GITHUB_STEP_SUMMARY"
+          shasum -a 256 "$DMG" >> "$GITHUB_STEP_SUMMARY"
+          echo '```' >> "$GITHUB_STEP_SUMMARY"
+          echo "Update Casks/shakeshelf.rb with this sha256." >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Create release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release create "${{ github.ref_name }}" \
+            --title "ShakeShelf ${{ github.ref_name }}" \
+            --generate-notes \
+            dist/*.dmg dist/*.dmg.sha256.txt
