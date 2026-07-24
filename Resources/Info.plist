@@ -2,25 +2,23 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
-	<key>CFBundleName</key>
-	<string>ShakeShelf</string>
 	<key>CFBundleDisplayName</key>
+	<string>ShakeShelf</string>
+	<key>CFBundleExecutable</key>
 	<string>ShakeShelf</string>
 	<key>CFBundleIdentifier</key>
 	<string>com.salomoncohen.shakeshelf</string>
-	<key>CFBundleExecutable</key>
+	<key>CFBundleName</key>
 	<string>ShakeShelf</string>
 	<key>CFBundlePackageType</key>
 	<string>APPL</string>
 	<key>CFBundleShortVersionString</key>
-	<string>1.0.0</string>
+	<string>1.0.1</string>
 	<key>CFBundleVersion</key>
-	<string>1</string>
+	<string>2</string>
 	<key>LSMinimumSystemVersion</key>
 	<string>13.0</string>
 	<key>LSUIElement</key>
-	<true/>
-	<key>NSHighResolutionCapable</key>
 	<true/>
 	<key>NSDesktopFolderUsageDescription</key>
 	<string>ShakeShelf copies new screenshots from your Desktop onto the shelf.</string>
@@ -28,5 +26,7 @@
 	<string>ShakeShelf copies screenshots saved in your Documents folder onto the shelf.</string>
 	<key>NSDownloadsFolderUsageDescription</key>
 	<string>ShakeShelf copies screenshots saved in your Downloads folder onto the shelf.</string>
+	<key>NSHighResolutionCapable</key>
+	<true/>
 </dict>
 </plist>
