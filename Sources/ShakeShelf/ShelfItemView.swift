@@ -10,6 +10,10 @@ enum ShelfItemRemovalKind {
 /// the user did to it.
 protocol ShelfTileDelegate: AnyObject {
     func tile(_ tile: ShelfItemView, wasClickedWith event: NSEvent)
+    /// A single click that did not turn into a drag — the shelf takes keyboard
+    /// focus here (not on mouse-down) so dragging a tile out never steals
+    /// focus from the destination app.
+    func tilePlainClicked(_ tile: ShelfItemView)
     /// The items a drag starting from this tile should carry — the whole
     /// selection when the tile is part of one, otherwise just itself.
     func itemsForDrag(startingFrom item: ShelfItem) -> [ShelfItem]
@@ -291,6 +295,11 @@ final class ShelfItemView: NSView, NSDraggingSource {
     override func mouseUp(with event: NSEvent) {
         if event.clickCount == 2 {
             NSWorkspace.shared.open(item.fileURL)
+        } else if event.clickCount == 1 {
+            // Reached only when the press did not become a drag (a drag runs
+            // its own event loop and never delivers mouseUp here), so this is
+            // a plain select-click — safe to take focus for ⌘C.
+            delegate?.tilePlainClicked(self)
         }
         mouseDownEvent = nil
     }

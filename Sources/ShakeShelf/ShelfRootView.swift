@@ -284,7 +284,21 @@ final class ShelfRootView: NSView {
     /// Clicking the shelf background drops the selection, matching Finder.
     override func mouseDown(with event: NSEvent) {
         clearSelection()
+        takeKeyboardFocus()
         super.mouseDown(with: event)
+    }
+
+    override var acceptsFirstResponder: Bool { true }
+
+    /// The shelf is a non-activating panel, so it never gets keyboard focus on
+    /// its own — which is why ⌘V/⌘C would otherwise do nothing. When the user
+    /// clicks into it, deliberately take focus so those shortcuts reach us.
+    /// Summoning by shake still uses orderFrontRegardless and does not steal
+    /// focus; only an explicit click does.
+    private func takeKeyboardFocus() {
+        NSApp.activate(ignoringOtherApps: true)
+        window?.makeKeyAndOrderFront(nil)
+        window?.makeFirstResponder(self)
     }
 
     @objc private func clearTapped() {
@@ -495,13 +509,79 @@ final class ShelfRootView: NSView {
         return imported
     }
 
-    override func keyDown(with event: NSEvent) {
-        // ⌘V, for the times the panel happens to be key.
-        if event.modifierFlags.contains(.command), event.charactersIgnoringModifiers == "v" {
-            addClipboardContents()
-            return
+    // ⌘-combinations arrive as key equivalents before keyDown, so this is the
+    // reliable place to catch them. Fires whenever the shelf is the key window
+    // (i.e. after a click), no first-responder juggling required.
+    override func performKeyEquivalent(with event: NSEvent) -> Bool {
+        if event.modifierFlags.intersection(.deviceIndependentFlagsMask) == .command {
+            switch event.charactersIgnoringModifiers {
+            case "v":
+                addClipboardContents()
+                return true
+            case "c":
+                if copySelection() { return true }
+            default:
+                break
+            }
         }
-        super.keyDown(with: event)
+        return super.performKeyEquivalent(with: event)
+    }
+
+    /// Copies the selected tiles to the system clipboard so they can be pasted
+    /// anywhere. Returns false (so ⌘C falls through) when nothing is selected.
+    @discardableResult
+    func copySelection() -> Bool {
+        let items = selectedItems()
+        guard !items.isEmpty else { return false }
+        let pasteboard = NSPasteboard.general
+        pasteboard.clearContents()
+
+        // All-text is the common case (and what "copy a note to paste on my
+        // laptop" means): write one plain string so it drops into any editor.
+        if items.allSatisfy({ $0.kind == .text }) {
+            let joined = items.compactMap(\.text).joined(separator: "\n\n")
+            pasteboard.setString(joined, forType: .string)
+            return true
+        }
+        if items.count == 1, let item = items.first {
+            writeToPasteboard(item, pasteboard)
+            return true
+        }
+        // Mixed selection: files as references, text as strings.
+        var objects: [NSPasteboardWriting] = []
+        for item in items {
+            if item.kind == .text, let text = item.text {
+                let pbItem = NSPasteboardItem()
+                pbItem.setString(text, forType: .string)
+                objects.append(pbItem)
+            } else {
+                objects.append(item.fileURL as NSURL)
+            }
+        }
+        pasteboard.writeObjects(objects)
+        return true
+    }
+
+    private func writeToPasteboard(_ item: ShelfItem, _ pasteboard: NSPasteboard) {
+        switch item.kind {
+        case .text:
+            pasteboard.setString(item.text ?? "", forType: .string)
+        case .color:
+            let pbItem = NSPasteboardItem()
+            if let color = item.color {
+                if let data = try? NSKeyedArchiver.archivedData(withRootObject: color, requiringSecureCoding: true) {
+                    pbItem.setData(data, forType: .color)
+                }
+                pbItem.setString(color.hexString, forType: .string)
+            }
+            pasteboard.writeObjects([pbItem])
+        case .image, .file:
+            var objects: [NSPasteboardWriting] = [item.fileURL as NSURL]
+            if let image = NSImage(contentsOf: item.fileURL) {
+                objects.append(image)
+            }
+            pasteboard.writeObjects(objects)
+        }
     }
 
     @objc private func closeTapped() {
@@ -613,6 +693,10 @@ extension ShelfRootView: ShelfTileDelegate {
             selectionAnchor = id
         }
         applySelectionToTiles()
+    }
+
+    func tilePlainClicked(_ tile: ShelfItemView) {
+        takeKeyboardFocus()
     }
 
     func itemsForDrag(startingFrom item: ShelfItem) -> [ShelfItem] {

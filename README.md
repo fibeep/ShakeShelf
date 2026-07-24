@@ -164,6 +164,11 @@ To build a DMG locally instead, run `./package.sh` (optionally passing a
 - **Multi-select** — click to select, ⌘-click to add, ⇧-click for a range,
   click the background to clear. Dragging one selected tile drags them all out
   together, and batch operations use the selection when there is one.
+- **Copy & paste** — clicking into the shelf gives it keyboard focus, so **⌘V**
+  pastes the clipboard onto the shelf (text becomes a note, an image becomes a
+  tile) and **⌘C** copies the selected tiles back to the system clipboard —
+  a selected note copies as plain text you can paste anywhere. Dragging a tile
+  out never takes focus, so it doesn't interrupt the destination app.
 - **Text snippets** — drag selected text onto the shelf and it's kept as a tile
   showing a preview. Drag it back out and it arrives as plain text, so it pastes
   straight into a Slack message or email rather than showing up as a file
