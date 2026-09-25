@@ -31,8 +31,12 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
         shakeDetector.start()
         registerHotKeys()
 
-        // The watcher always runs; the preference is checked per event so the
-        // menu toggle takes effect immediately.
+        // The watcher runs only while auto-add is on: starting it reads the
+        // screenshot folder, which is what triggers macOS's Desktop permission
+        // prompt, and nobody who turned the feature off should see that.
+        screenshotWatcher.onAccessDenied = { [weak self] _ in
+            self?.showAutoAddFailureHintOnce()
+        }
         screenshotWatcher.onScreenshot = { [weak self] url in
             guard let self, Prefs.autoAddScreenshots else { return }
             self.store.importFile(at: url) { [weak self] result in
@@ -50,7 +54,9 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
                 }
             }
         }
-        screenshotWatcher.start()
+        if Prefs.autoAddScreenshots {
+            screenshotWatcher.start()
+        }
 
         let defaults = UserDefaults.standard
         if !defaults.bool(forKey: "hasLaunchedBefore") {
@@ -174,6 +180,11 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
 
     @objc private func toggleAutoAdd() {
         Prefs.autoAddScreenshots.toggle()
+        if Prefs.autoAddScreenshots {
+            screenshotWatcher.start()
+        } else {
+            screenshotWatcher.stop()
+        }
     }
 
     @objc private func toggleRemoveAfterDrag() {
@@ -232,8 +243,8 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
         guard !didShowAutoAddFailureHint else { return }
         didShowAutoAddFailureHint = true
         let alert = NSAlert()
-        alert.messageText = "ShakeShelf couldn't add your screenshot"
-        alert.informativeText = "This usually means ShakeShelf doesn't have permission to read the folder where screenshots are saved (Desktop by default). Allow access under System Settings → Privacy & Security → Files and Folders, then take another screenshot. You can still drag screenshots onto the shelf yourself."
+        alert.messageText = "ShakeShelf can't see your screenshots"
+        alert.informativeText = "ShakeShelf needs permission to read the folder where screenshots are saved (Desktop by default). Turn on ShakeShelf under System Settings → Privacy & Security → Files and Folders. It picks up the change on its own — no relaunch needed. You can still drag screenshots onto the shelf yourself."
         alert.addButton(withTitle: "Open Privacy Settings")
         alert.addButton(withTitle: "OK")
         NSApp.activate(ignoringOtherApps: true)

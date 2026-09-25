@@ -178,8 +178,11 @@ To build a DMG locally instead, run `./package.sh` (optionally passing a
   Clipboard to Shelf" in the menu) stashes whatever you last copied, text or
   image. This is also how clipboard-only screenshots (`⌃⇧⌘4`) get onto the
   shelf.
-- **Auto-add screenshots** *(on by default, toggle in the menu)* — screenshots
-  saved to disk are added to the shelf automatically.
+- **Auto-add screenshots** *(on by default, toggle in the menu)* — every
+  screenshot saved to disk is added to the shelf automatically, and the shelf
+  pops up. ShakeShelf watches your screenshot folder directly (the Desktop, or
+  whatever you picked in ⇧⌘5 → Options) and recognises screenshots by the
+  marker macOS stamps on them, so renamed or localised filenames still count.
 - **Eyedropper** — the pipette button in the header (or "Pick Color from
   Screen…" in the menu) opens the system loupe and stores the color as a
   swatch. Drag a swatch into any color well (Xcode, Sketch, the system picker)
@@ -228,8 +231,10 @@ To build a DMG locally instead, run `./package.sh` (optionally passing a
 
 ## Notes & limitations
 
-- macOS will ask for permission the first time the app reads your Desktop
-  (where screenshots are saved). Approve it so auto-add works. Because the app
+- At launch, macOS asks whether ShakeShelf may access your Desktop (where
+  screenshots are saved). Approve it so auto-add works; after that ShakeShelf
+  is listed under Privacy & Security → Files and Folders. If you declined, turn
+  it on there — the app notices within a few seconds, no relaunch. Because the app
   is ad-hoc signed, **rebuilding resets that permission** — expect to re-approve
   after each `./build.sh`. If auto-add ever stops working, check System Settings
   → Privacy & Security → Files and Folders.
