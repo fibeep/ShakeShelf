@@ -1,6 +1,6 @@
 cask "shakeshelf" do
-  version "1.0.2"
-  sha256 "b8b78720a09276d264a517aa1eb924988552f1813d01041bace418936d025a0f"
+  version "1.0.3"
+  sha256 "19608e2b881ac24f530e7d1e9638284c946d88b8caab933bdb1cb6caa8df6951"
 
   url "https://github.com/fibeep/ShakeShelf/releases/download/v#{version}/ShakeShelf-#{version}.dmg",
       verified: "github.com/fibeep/ShakeShelf/"
