@@ -13,7 +13,7 @@ final class ScreenshotWatcher: NSObject {
     override init() {
         super.init()
         query.predicate = NSPredicate(format: "kMDItemIsScreenCapture == 1")
-        query.searchScopes = [NSMetadataQueryUserHomeScope]
+        query.searchScopes = Self.searchScopes()
         query.operationQueue = .main
         query.notificationBatchingInterval = 0.2
         NotificationCenter.default.addObserver(
@@ -28,6 +28,21 @@ final class ScreenshotWatcher: NSObject {
         DispatchQueue.main.async { [query] in
             query.start()
         }
+    }
+
+    /// The home folder covers the default Desktop location and Documents /
+    /// Downloads. If the user has pointed macOS at a custom screenshot folder
+    /// outside home (`defaults read com.apple.screencapture location`), add it
+    /// so those screenshots are still caught.
+    private static func searchScopes() -> [Any] {
+        var scopes: [Any] = [NSMetadataQueryUserHomeScope]
+        if let location = UserDefaults(suiteName: "com.apple.screencapture")?.string(forKey: "location") {
+            let expanded = (location as NSString).expandingTildeInPath
+            if !expanded.isEmpty {
+                scopes.append(URL(fileURLWithPath: expanded, isDirectory: true))
+            }
+        }
+        return scopes
     }
 
     func stop() {

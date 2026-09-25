@@ -68,6 +68,18 @@ final class ShelfWindowController: NSWindowController, ShelfStoreDelegate {
         window?.orderFrontRegardless()
     }
 
+    /// Surfaces the shelf for a freshly captured screenshot: pops it up next to
+    /// the pointer if it's hidden, or brings the already-open shelf to the
+    /// front. Uses orderFrontRegardless, so it never steals focus from whatever
+    /// you're working in.
+    func presentForNewScreenshot() {
+        if isVisible {
+            bringToFront()
+        } else {
+            presentNearMouse()
+        }
+    }
+
     func hide() {
         window?.orderOut(nil)
     }

@@ -39,9 +39,9 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
                 guard let self else { return }
                 switch result {
                 case .added:
-                    if !self.shelf.isVisible {
-                        self.shelf.presentNearMouse()
-                    }
+                    // Bring the shelf up on every screenshot, whether or not
+                    // it is already open.
+                    self.shelf.presentForNewScreenshot()
                 case .duplicate:
                     break
                 case .failed(let reason):
